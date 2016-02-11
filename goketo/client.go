@@ -16,6 +16,7 @@ import (
 type Client struct {
 	client   *http.Client
 	endpoint string
+	identity string
 	version  string
 	token    *AuthToken
 }
@@ -57,12 +58,15 @@ func NewAuthClient(clientID string, ClientSecret string, ClientEndpoint string) 
 	// Endpoint: /identity/oauth/token?grant_type=client_credentials
 	version := "v1"
 	var endpoint string
+	var identity string
 
 	// Check if endpoint has proper protocol
 	if strings.HasPrefix(ClientEndpoint, "http") {
-		endpoint = ClientEndpoint
+		endpoint = ClientEndpoint + "/rest/" + version + "/"
+		identity = ClientEndpoint + "/identity/"
 	} else {
-		endpoint = "https://" + ClientEndpoint
+		endpoint = "https://" + ClientEndpoint + "/rest/" + version + "/"
+		identity = "https://" + ClientEndpoint + "/identity/"
 	}
 	// Add credentials to the request
 	client := &http.Client{
@@ -72,7 +76,7 @@ func NewAuthClient(clientID string, ClientSecret string, ClientEndpoint string) 
 		},
 	}
 	// Make request for token
-	resp, err := client.Get(endpoint + "/identity/oauth/token?grant_type=client_credentials")
+	resp, err := client.Get(identity + "oauth/token?grant_type=client_credentials")
 	if err != nil {
 		return nil, err
 	}
@@ -83,17 +87,16 @@ func NewAuthClient(clientID string, ClientSecret string, ClientEndpoint string) 
 		if err != nil {
 			logrus.Errorf("Could not convert response: %v", err)
 		}
-
 		err = json.Unmarshal(data, &auth)
 		logrus.Infof("Token: %s - Type: %s", auth.Token, auth.Type)
 	} else {
 		logrus.Errorf("An error occured while fetching data: %v", resp)
 	}
-	endpoint += "/rest/" + version + "/"
 
 	return &Client{
 		client:   client,
 		endpoint: endpoint,
+		identity: identity,
 		version:  version,
 		token:    &auth,
 	}, nil
