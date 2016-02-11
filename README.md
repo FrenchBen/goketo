@@ -1,5 +1,11 @@
-# Marketo REST API Client
-================
+GoKeto: Marketo REST API Client
+===============================
+<p align="center">
+  <img src="https://raw.githubusercontent.com/FrenchBen/go-marketo/master/doc/Marketo-logo.jpg" alt="Marketo Logo"/>
+</p>
+
+About
+----------------
 Unofficial Golang client for the Marketo.com REST API: http://developers.marketo.com/documentation/rest/.
 Inspired by the `VojtechVitek/go-trello` implementation
 
