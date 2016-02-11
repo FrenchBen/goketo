@@ -18,7 +18,7 @@ type Client struct {
 	endpoint string
 	identity string
 	version  string
-	token    *AuthToken
+	auth     *AuthToken
 }
 
 // bearerRoundTripper wrapper for query params
@@ -98,7 +98,7 @@ func NewAuthClient(clientID string, ClientSecret string, ClientEndpoint string) 
 		endpoint: endpoint,
 		identity: identity,
 		version:  version,
-		token:    &auth,
+		auth:     &auth,
 	}, nil
 }
 
@@ -126,6 +126,7 @@ func (c *Client) Get(resource string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Add("Authorization", strings.ToUpper(c.auth.Type[:1])+c.auth.Type[1:]+" "+c.auth.Token)
 	return c.do(req)
 }
 
@@ -136,6 +137,7 @@ func (c *Client) Post(resource string, data url.Values) ([]byte, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Authorization", strings.ToUpper(c.auth.Type[:1])+c.auth.Type[1:]+" "+c.auth.Token)
 
 	return c.do(req)
 }
