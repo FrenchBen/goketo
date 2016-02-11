@@ -27,7 +27,7 @@ type bearerRoundTripper struct {
 	clientSecret string
 }
 
-// authToken holds data from Auth request
+// AuthToken holds data from Auth request
 type AuthToken struct {
 	Token   string `json:"access_token"`
 	Type    string `json:"token_type"`
@@ -58,20 +58,20 @@ func NewAuthClient(clientID string, ClientSecret string, ClientEndpoint string) 
 	version := "v1"
 	var endpoint string
 
-	// Make request for token
-	// endpoint: /identity/oauth/token?grant_type=client_credentials
-
+	// Check if endpoint has proper protocol
 	if strings.HasPrefix(ClientEndpoint, "http") {
 		endpoint = ClientEndpoint
 	} else {
 		endpoint = "https://" + ClientEndpoint
 	}
+	// Add credentials to the request
 	client := &http.Client{
 		Transport: &bearerRoundTripper{
 			clientID:     clientID,
 			clientSecret: ClientSecret,
 		},
 	}
+	// Make request for token
 	resp, err := client.Get(endpoint + "/identity/oauth/token?grant_type=client_credentials")
 	if err != nil {
 		return nil, err
@@ -126,6 +126,7 @@ func (c *Client) Get(resource string) ([]byte, error) {
 	return c.do(req)
 }
 
+// Post to resource string the data provided
 func (c *Client) Post(resource string, data url.Values) ([]byte, error) {
 	req, err := http.NewRequest("POST", c.endpoint+resource, strings.NewReader(data.Encode()))
 	if err != nil {
