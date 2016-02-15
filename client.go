@@ -88,7 +88,6 @@ func NewAuthClient(clientID string, ClientSecret string, ClientEndpoint string) 
 			logrus.Errorf("Could not convert response: %v", err)
 		}
 		err = json.Unmarshal(data, &auth)
-		logrus.Infof("Token: %s - Type: %s", auth.Token, auth.Type)
 	} else {
 		logrus.Errorf("An error occured while fetching data: %v", resp)
 	}
@@ -126,7 +125,7 @@ func (c *Client) Get(resource string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", strings.ToUpper(c.auth.Type[:1])+c.auth.Type[1:]+" "+c.auth.Token)
+	req.Header.Add("Authorization", "Bearer "+c.auth.Token)
 	return c.do(req)
 }
 
@@ -137,7 +136,7 @@ func (c *Client) Post(resource string, data url.Values) ([]byte, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Authorization", strings.ToUpper(c.auth.Type[:1])+c.auth.Type[1:]+" "+c.auth.Token)
+	req.Header.Add("Authorization", "Bearer "+c.auth.Token)
 
 	return c.do(req)
 }
