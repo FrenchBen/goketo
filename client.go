@@ -1,12 +1,12 @@
 package goketo
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/Sirupsen/logrus"
@@ -130,12 +130,12 @@ func (c *Client) Get(resource string) ([]byte, error) {
 }
 
 // Post to resource string the data provided
-func (c *Client) Post(resource string, data url.Values) ([]byte, error) {
-	req, err := http.NewRequest("POST", c.endpoint+resource, strings.NewReader(data.Encode()))
+func (c *Client) Post(resource string, data []byte) ([]byte, error) {
+	req, err := http.NewRequest("POST", c.endpoint+resource, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+c.auth.Token)
 
 	return c.do(req)

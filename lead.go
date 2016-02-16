@@ -29,9 +29,28 @@ type LeadResult struct {
 	Updated   string `json:"updatedAt"`
 }
 
+// LeadRequest builds a request for data retrieval
+type LeadRequest struct {
+	ID   string // List ID
+	Next string // Next page Token
+}
+
+// LeadUpdate builds the data for an update
+type LeadUpdate struct {
+	Action string        `json:"action"`
+	Lookup string        `json:"lookupField"`
+	Data   []interface{} `json:"input"`
+}
+
 // Leads Get leads by list Id
-func (c *Client) Leads(listID string) (leads *Leads, err error) {
-	body, err := c.Get("/list/" + listID + "/leads.json")
+func (c *Client) Leads(list *LeadRequest) (leads *Leads, err error) {
+	var nextPage string
+	if list.Next != "" {
+		nextPage = "?nextPageToken=" + list.Next
+	} else {
+		nextPage = ""
+	}
+	body, err := c.Get("/list/" + list.ID + "/leads.json" + nextPage)
 	if err != nil {
 		return
 	}
@@ -39,6 +58,16 @@ func (c *Client) Leads(listID string) (leads *Leads, err error) {
 	err = json.Unmarshal(body, &leads)
 	leads.client = c
 	return
+}
+
+// UpdateLeads post update of data for a lead
+func (c *Client) UpdateLeads(update LeadUpdate) ([]byte, error) {
+	data, err := json.Marshal(update)
+	if err != nil {
+		return nil, err
+	}
+	body, err := c.Post("/leads.json", data)
+	return body, err
 }
 
 // Lead Get lead by Id - aka member by ID
