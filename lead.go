@@ -37,9 +37,9 @@ type LeadRequest struct {
 
 // LeadUpdate builds the data for an update
 type LeadUpdate struct {
-	Action string        `json:"action"`
-	Lookup string        `json:"lookupField"`
-	Data   []interface{} `json:"input"`
+	Action string            `json:"action"` // createOnly - updateOnly - createOrUpdate(default request) - createDuplicate
+	Lookup string            `json:"lookupField"`
+	Data   map[string]string `json:"input"`
 }
 
 // Leads Get leads by list Id
