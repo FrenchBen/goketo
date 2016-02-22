@@ -4,26 +4,20 @@ import (
 	"encoding/json"
 	"net/url"
 	"strings"
-)
 
-// Lead response from lead request
-type Lead struct {
-	client    *Client
-	RequestID string       `json:"requestId"`
-	Result    []LeadResult `json:"result"`
-	Success   bool         `json:"success"`
-}
+	"github.com/Sirupsen/logrus"
+)
 
 // Leads response from list request
 type Leads struct {
 	client    *Client
-	RequestID string       `json:"requestId"`
-	Result    []LeadResult `json:"result"`
-	Success   bool         `json:"success"`
-	Next      string       `json:"nextPageToken"`
+	RequestID string          `json:"requestId"`
+	Result    json.RawMessage `json:"result"`
+	Success   bool            `json:"success"`
+	Next      string          `json:"nextPageToken,omitempty"`
 }
 
-// LeadResult result struct as part of the lead
+// LeadResult default result struct as part of the lead - can be customized to allow greater fields
 type LeadResult struct {
 	ID        int    `json:"id"`
 	FirstName string `json:"firstName"`
@@ -49,9 +43,9 @@ type LeadUpdate struct {
 
 // LeadUpdateResponse data format for update response
 type LeadUpdateResponse struct {
-	ID      string             `json:"requestId"`
-	Success bool               `json:"success"`
-	Result  []LeadUpdateResult `json:"result"`
+	ID      string          `json:"requestId"`
+	Success bool            `json:"success"`
+	Result  json.RawMessage `json:"result"`
 }
 
 // LeadUpdateResult holds result for all updates
@@ -79,11 +73,12 @@ func (c *Client) Leads(list *LeadRequest) (leads *Leads, err error) {
 }
 
 // Lead Get lead by Id - aka member by ID
-func (c *Client) Lead(leadReq *LeadRequest) (lead *Lead, err error) {
+func (c *Client) Lead(leadReq *LeadRequest) (lead *Leads, err error) {
 	fields := url.Values{}
 	if len(leadReq.Fields) > 0 {
 		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
 	}
+	logrus.Info("Fields: ", fields.Encode())
 	body, err := c.Get("/lead/" + leadReq.ID + ".json" + "?" + fields.Encode())
 	if err != nil {
 		return
