@@ -60,16 +60,6 @@ func (c *Client) Leads(list *LeadRequest) (leads *Leads, err error) {
 	return
 }
 
-// UpdateLeads post update of data for a lead
-func (c *Client) UpdateLeads(update LeadUpdate) ([]byte, error) {
-	data, err := json.Marshal(update)
-	if err != nil {
-		return nil, err
-	}
-	body, err := c.Post("/leads.json", data)
-	return body, err
-}
-
 // Lead Get lead by Id - aka member by ID
 func (c *Client) Lead(leadID string) (lead *Lead, err error) {
 	body, err := c.Get("/lead/" + leadID + ".json")
@@ -80,4 +70,14 @@ func (c *Client) Lead(leadID string) (lead *Lead, err error) {
 	err = json.Unmarshal(body, &lead)
 	lead.client = c
 	return
+}
+
+// UpdateLeads post update of data for a lead
+func (c *Client) UpdateLeads(update LeadUpdate) ([]byte, error) {
+	data, err := json.Marshal(update)
+	if err != nil {
+		return nil, err
+	}
+	body, err := c.Post("/leads.json", data)
+	return body, err
 }

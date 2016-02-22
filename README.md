@@ -1,7 +1,8 @@
 GoKeto: Marketo REST API Client
 ===============================
 <p align="center">
-  <img src="https://raw.githubusercontent.com/FrenchBen/go-marketo/master/doc/Marketo-logo.jpg" alt="Marketo Logo"/>
+  <a href="http://golang.org" target="_blank"><img alt="Go package" src="https://golang.org/doc/gopher/pencil/gopherhat.jpg" width="20%" /></a>
+  <a href="https://www.marketo.com/" target="_blank"><img src="https://raw.githubusercontent.com/FrenchBen/go-marketo/master/doc/Marketo-logo.jpg" alt="Marketo Logo"/></a>
 </p>
 
 About
