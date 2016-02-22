@@ -1,6 +1,10 @@
 package goketo
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"net/url"
+	"strings"
+)
 
 // Lead response from lead request
 type Lead struct {
@@ -31,8 +35,9 @@ type LeadResult struct {
 
 // LeadRequest builds a request for data retrieval
 type LeadRequest struct {
-	ID   string // List ID
-	Next string // Next page Token
+	ID     string // List ID
+	Next   string // Next page Token
+	Fields string
 }
 
 // LeadUpdate builds the data for an update
@@ -40,6 +45,19 @@ type LeadUpdate struct {
 	Action string            `json:"action"` // createOnly - updateOnly - createOrUpdate(default request) - createDuplicate
 	Lookup string            `json:"lookupField"`
 	Data   map[string]string `json:"input"`
+}
+
+// LeadUpdateResponse data format for update response
+type LeadUpdateResponse struct {
+	ID      string             `json:"requestId"`
+	Success bool               `json:"success"`
+	Result  []LeadUpdateResult `json:"result"`
+}
+
+// LeadUpdateResult holds result for all updates
+type LeadUpdateResult struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
 }
 
 // Leads Get leads by list Id
@@ -61,8 +79,12 @@ func (c *Client) Leads(list *LeadRequest) (leads *Leads, err error) {
 }
 
 // Lead Get lead by Id - aka member by ID
-func (c *Client) Lead(leadID string) (lead *Lead, err error) {
-	body, err := c.Get("/lead/" + leadID + ".json")
+func (c *Client) Lead(leadReq *LeadRequest) (lead *Lead, err error) {
+	fields := url.Values{}
+	if len(leadReq.Fields) > 0 {
+		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
+	}
+	body, err := c.Get("/lead/" + leadReq.ID + ".json" + "?" + fields.Encode())
 	if err != nil {
 		return
 	}
@@ -73,7 +95,7 @@ func (c *Client) Lead(leadID string) (lead *Lead, err error) {
 }
 
 // UpdateLeads post update of data for a lead
-func (c *Client) UpdateLeads(update LeadUpdate) ([]byte, error) {
+func (c *Client) UpdateLeads(update *LeadUpdate) ([]byte, error) {
 	data, err := json.Marshal(update)
 	if err != nil {
 		return nil, err

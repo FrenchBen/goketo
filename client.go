@@ -131,6 +131,7 @@ func (c *Client) Get(resource string) ([]byte, error) {
 
 // Post to resource string the data provided
 func (c *Client) Post(resource string, data []byte) ([]byte, error) {
+	logrus.Info("Debug: ", resource)
 	req, err := http.NewRequest("POST", c.endpoint+resource, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
