@@ -121,19 +121,16 @@ func (c *Client) do(req *http.Request) ([]byte, error) {
 
 // Get resource string
 func (c *Client) Get(resource string) ([]byte, error) {
-	logrus.Info("Endpoint Debug: ", c.endpoint+resource)
 	req, err := http.NewRequest("GET", c.endpoint+resource, nil)
 	if err != nil {
 		return nil, err
 	}
-	logrus.Info("Token: ", c.auth.Token)
 	req.Header.Add("Authorization", "Bearer "+c.auth.Token)
 	return c.do(req)
 }
 
 // Post to resource string the data provided
 func (c *Client) Post(resource string, data []byte) ([]byte, error) {
-	logrus.Info("Endpoint Debug: ", resource)
 	req, err := http.NewRequest("POST", c.endpoint+resource, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
