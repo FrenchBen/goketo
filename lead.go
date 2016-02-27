@@ -9,8 +9,8 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-// Leads response from list request
-type Leads struct {
+// LeadResponse response from list request
+type LeadResponse struct {
 	client    *Client
 	RequestID string          `json:"requestId"`
 	Result    json.RawMessage `json:"result"`
@@ -63,7 +63,7 @@ type LeadError struct {
 }
 
 // Leads Get leads by list Id
-func (c *Client) Leads(list *LeadRequest) (leads *Leads, err error) {
+func (c *Client) Leads(list *LeadRequest) (leads *LeadResponse, err error) {
 	var nextPage string
 	if list.Next != "" {
 		nextPage = "?nextPageToken=" + list.Next
@@ -80,7 +80,7 @@ func (c *Client) Leads(list *LeadRequest) (leads *Leads, err error) {
 }
 
 // Lead Get lead by Id - aka member by ID
-func (c *Client) Lead(leadReq *LeadRequest) (lead *Leads, err error) {
+func (c *Client) Lead(leadReq *LeadRequest) (lead *LeadResponse, err error) {
 	fields := url.Values{}
 	if len(leadReq.Fields) > 0 {
 		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
