@@ -53,18 +53,27 @@ func main() {
 		log.Fatal(err)
 	}
 	// Get leads
-	leads, err := marketo.Leads(auth.LeadID)
+  listID, _ := strconv.Atoi(auth.LeadID)
+	leadRequest := &goketo.LeadRequest{ID: listID}
+	leads, err := marketo.Leads(leadRequest)
 	if err != nil {
 		logrus.Error("Couldn't get leads: ", err)
-	}
-  logrus.Infof("My leads: %v", leads)
+	}  
+  results := []goketo.LeadResult{}
+	err = json.Unmarshal(leads.Result, &results)
+  logrus.Infof("My leads: %v", results)
+
 
   // Get user by lead ID
-	lead, err := marketo.Lead(leads.Result[0].ID)
+  leadID, _ := results[0].ID
+	leadRequest := &goketo.LeadRequest{ID: leadID}
+	lead, err := marketo.Lead(leadRequest)
 	if err != nil {
 		logrus.Error("Couldn't get lead: ", err)
 	}
-  logrus.Infof("My lead from ID: %v", lead)
+  result := []goketo.LeadResult{}
+	err = json.Unmarshal(leads.Result, &result)
+  logrus.Infof("My lead from ID: %v", result)
 }
 ```
 
