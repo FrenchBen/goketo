@@ -63,14 +63,17 @@ type LeadError struct {
 }
 
 // Leads Get leads by list Id
-func (c *Client) Leads(list *LeadRequest) (leads *LeadResponse, err error) {
-	var nextPage string
-	if list.Next != "" {
-		nextPage = "?nextPageToken=" + list.Next
-	} else {
-		nextPage = ""
+func (c *Client) Leads(leadReq *LeadRequest) (leads *LeadResponse, err error) {
+	nextPage := url.Values{}
+	if leadReq.Next != "" {
+		nextPage.Set("nextPageToken", leadReq.Next)
 	}
-	body, err := c.Get("/list/" + strconv.Itoa(list.ID) + "/leads.json" + nextPage)
+	fields := url.Values{}
+	if len(leadReq.Fields) > 0 {
+		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
+	}
+	logrus.Info("Fields: ", fields.Encode())
+	body, err := c.Get("/list/" + strconv.Itoa(leadReq.ID) + "/leads.json" + "?" + fields.Encode() + nextPage.Encode())
 	if err != nil {
 		return nil, err
 	}
