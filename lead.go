@@ -72,7 +72,7 @@ func (c *Client) Leads(leadReq *LeadRequest) (leads *LeadResponse, err error) {
 	if len(leadReq.Fields) > 0 {
 		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
 	}
-	logrus.Info("Fields: ", fields.Encode())
+	logrus.Debug("Fields: ", fields.Encode())
 	body, err := c.Get("/list/" + strconv.Itoa(leadReq.ID) + "/leads.json" + "?" + fields.Encode() + nextPage.Encode())
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (c *Client) Lead(leadReq *LeadRequest) (lead *LeadResponse, err error) {
 	if len(leadReq.Fields) > 0 {
 		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
 	}
-	logrus.Info("Fields: ", fields.Encode())
+	logrus.Debug("Fields: ", fields.Encode())
 	body, err := c.Get("/lead/" + strconv.Itoa(leadReq.ID) + ".json" + "?" + fields.Encode())
 	if err != nil {
 		return

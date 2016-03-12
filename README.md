@@ -77,6 +77,9 @@ func main() {
 }
 ```
 
+To view more the token and fields sent with the request, set your log level to debug:
+`logrus.SetLevel(logrus.DebugLevel)`
+
 
 License
 ----------------

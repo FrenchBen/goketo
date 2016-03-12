@@ -125,6 +125,7 @@ func (c *Client) Get(resource string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	logrus.Debug("Token: ", c.auth.Token)
 	req.Header.Add("Authorization", "Bearer "+c.auth.Token)
 	return c.do(req)
 }
