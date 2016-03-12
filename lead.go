@@ -62,6 +62,29 @@ type LeadError struct {
 	Message string `json:"message"`
 }
 
+// LeadFieldResponse describes all possible fields for Leads
+type LeadFieldResponse struct {
+	client    *Client
+	RequestID string      `json:"requestId"`
+	Result    []LeadField `json:"result"`
+	Success   bool        `json:"success"`
+}
+
+// LeadField result for strucs
+type LeadField struct {
+	ID     int    `json:"id"`
+	Name   string `json:"displayName"`
+	Type   string `json:"dataType"`
+	Length int    `json:"length"`
+	Rest   webService
+	Soap   webService
+}
+
+type webService struct {
+	Name     string `json:"name"`
+	ReadOnly bool   `json:"readOnly"`
+}
+
 // Leads Get leads by list Id
 func (c *Client) Leads(leadReq *LeadRequest) (leads *LeadResponse, err error) {
 	nextPage := url.Values{}
@@ -106,4 +129,11 @@ func (c *Client) UpdateLeads(update *LeadUpdate) ([]byte, error) {
 	}
 	body, err := c.Post("/leads.json", data)
 	return body, err
+}
+
+// GetFields post update of data for a lead
+func (c *Client) GetFields() (fields *LeadFieldResponse, err error) {
+	body, err := c.Get("/leads/describe.json")
+	err = json.Unmarshal(body, &fields)
+	return fields, err
 }
