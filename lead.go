@@ -9,6 +9,10 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
+// Convert all to Interfaces for re-usability
+// Add fmt.Sprintf("%v:%v", host, port) to build strings
+
+
 // LeadResponse response from list request
 type LeadResponse struct {
 	client    *Client
@@ -16,6 +20,7 @@ type LeadResponse struct {
 	Result    json.RawMessage `json:"result"`
 	Success   bool            `json:"success"`
 	Next      string          `json:"nextPageToken,omitempty"`
+	More      bool            `json:"moreResult,omitempty"`
 }
 
 // LeadResult default result struct as part of the lead - can be customized to allow greater fields
@@ -62,7 +67,7 @@ type LeadError struct {
 	Message string `json:"message"`
 }
 
-// LeadFieldResponse describes all possible fields for Leads
+// LeadFieldResponse response for all fields
 type LeadFieldResponse struct {
 	client    *Client
 	RequestID string      `json:"requestId"`
@@ -70,19 +75,37 @@ type LeadFieldResponse struct {
 	Success   bool        `json:"success"`
 }
 
-// LeadField result for strucs
+// LeadField describes all possible fields for Leads
 type LeadField struct {
 	ID     int    `json:"id"`
 	Name   string `json:"displayName"`
 	Type   string `json:"dataType"`
 	Length int    `json:"length"`
-	Rest   webService
-	Soap   webService
+	Rest   struct {
+		Name     string `json:"name"`
+		ReadOnly bool   `json:"readOnly"`
+	} `json:"rest"`
+	Soap struct {
+		Name     string `json:"name"`
+		ReadOnly bool   `json:"readOnly"`
+	} `json:"soap"`
 }
 
-type webService struct {
-	Name     string `json:"name"`
-	ReadOnly bool   `json:"readOnly"`
+// DeletedLeadResponse response of Deleted lead request
+type DeletedLeadResponse struct {
+	*LeadResponse
+	Result []DeletedLead `json:"result"`
+}
+
+// DeletedLead result
+type DeletedLead struct {
+	ID         int      `json:"id"`
+	LeadID     int      `json:"leadId"`
+	Date       string   `json:"activityDate"`
+	TypeID     int      `json:"activityTypeId"`
+	PrimaryID  int      `json:"primaryAttributeValueId"`
+	PrimaryVal string   `json:"primaryAttributeValue"`
+	Attributes []string `json:"attributes"`
 }
 
 // Leads Get leads by list Id
@@ -131,9 +154,20 @@ func (c *Client) UpdateLeads(update *LeadUpdate) ([]byte, error) {
 	return body, err
 }
 
-// GetFields post update of data for a lead
-func (c *Client) GetFields() (fields *LeadFieldResponse, err error) {
+// LeadFields return all fields and the data type of a lead object
+func (c *Client) LeadFields() (fields *LeadFieldResponse, err error) {
 	body, err := c.Get("/leads/describe.json")
 	err = json.Unmarshal(body, &fields)
 	return fields, err
+}
+
+// DeletedLeads returns a list of leads that were deleted
+func (c *Client) DeletedLeads(leadReq *LeadRequest) (deletedLeads *DeletedLeadResponse, err error) {
+	nextPage := url.Values{}
+	if leadReq.Next != "" {
+		nextPage.Set("nextPageToken", leadReq.Next)
+	}
+	body, err := c.Get("/activities/deletedleads.json?" + nextPage.Encode())
+	err = json.Unmarshal(body, &deletedLeads)
+	return deletedLeads, err
 }
