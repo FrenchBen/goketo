@@ -12,6 +12,13 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
+// Requester is the interface for all client calls - This allows easy test 'mocks'
+type Requester interface {
+	do(*http.Request) ([]byte, error)
+	Get(string) ([]byte, error)
+	Post(string, []byte) ([]byte, error)
+}
+
 // Client http client tracker
 type Client struct {
 	client   *http.Client
