@@ -168,7 +168,7 @@ func (c *Client) LeadFields() (fields *LeadFieldResponse, err error) {
 func (c *Client) DeletedLeads(leadReq *LeadRequest) (deletedLeads *DeletedLeadResponse, err error) {
 	nextPage := url.Values{}
 	if leadReq.Next != "" {
-		nextPage.Set("nextPageToken", leadReq.Next)
+		nextPage.Set("&nextPageToken", leadReq.Next)
 	}
 	body, err := c.Get("/activities/deletedleads.json?" + nextPage.Encode())
 	err = json.Unmarshal(body, &deletedLeads)
