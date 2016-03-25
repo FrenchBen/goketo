@@ -115,7 +115,7 @@ type DeletedLead struct {
 func (c *Client) Leads(leadReq *LeadRequest) (leads *LeadResponse, err error) {
 	nextPage := url.Values{}
 	if leadReq.Next != "" {
-		nextPage.Set("nextPageToken", leadReq.Next)
+		nextPage.Set("&nextPageToken", leadReq.Next)
 	}
 	fields := url.Values{}
 	if len(leadReq.Fields) > 0 {
