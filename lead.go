@@ -119,10 +119,10 @@ func (c *Client) Leads(leadReq *LeadRequest) (leads *LeadResponse, err error) {
 	}
 	fields := url.Values{}
 	if len(leadReq.Fields) > 0 {
-		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
+		fields.Set("&fields", strings.Join(strings.Fields(leadReq.Fields), ""))
 	}
 	logrus.Debug("Fields: ", fields.Encode())
-	body, err := c.Get("/list/" + strconv.Itoa(leadReq.ID) + "/leads.json" + "?" + fields.Encode() + nextPage.Encode())
+	body, err := c.Get("/list/" + strconv.Itoa(leadReq.ID) + "/leads.json" + "?" + nextPage.Encode() + fields.Encode())
 	if err != nil {
 		return nil, err
 	}
