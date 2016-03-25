@@ -12,7 +12,6 @@ import (
 // Convert all to Interfaces for re-usability
 // Add fmt.Sprintf("%v:%v", host, port) to build strings
 
-
 // LeadResponse response from list request
 type LeadResponse struct {
 	client    *Client
@@ -21,6 +20,10 @@ type LeadResponse struct {
 	Success   bool            `json:"success"`
 	Next      string          `json:"nextPageToken,omitempty"`
 	More      bool            `json:"moreResult,omitempty"`
+	Errors    []struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	} `json:"errors,omitempty"`
 }
 
 // LeadResult default result struct as part of the lead - can be customized to allow greater fields
@@ -141,7 +144,7 @@ func (c *Client) Lead(leadReq *LeadRequest) (lead *LeadResponse, err error) {
 	}
 	err = json.Unmarshal(body, &lead)
 	lead.client = c
-	return
+	return lead, err
 }
 
 // UpdateLeads post update of data for a lead

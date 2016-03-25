@@ -143,8 +143,6 @@ func (c *Client) Post(resource string, data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+c.auth.Token)
 
 	return c.do(req)
 }
