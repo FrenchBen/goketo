@@ -2,6 +2,7 @@ package goketo
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -115,17 +116,19 @@ type DeletedLead struct {
 func (c *Client) Leads(leadReq *LeadRequest) (leads *LeadResponse, err error) {
 	nextPage := url.Values{}
 	if leadReq.Next != "" {
-		nextPage.Set("&nextPageToken", leadReq.Next)
+		nextPage.Set("nextPageToken", leadReq.Next)
 	}
 	fields := url.Values{}
 	if len(leadReq.Fields) > 0 {
-		fields.Set("&fields", strings.Join(strings.Fields(leadReq.Fields), ""))
+		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
 	}
-	logrus.Debug("Fields: ", fields.Encode())
-	body, err := c.Get("/list/" + strconv.Itoa(leadReq.ID) + "/leads.json" + "?" + nextPage.Encode() + fields.Encode())
+	url := fmt.Sprintf("/list/%s/leads.json?%s&%s", strconv.Itoa(leadReq.ID), nextPage.Encode(), fields.Encode())
+	logrus.Debug("Get: ", url)
+	body, err := c.Get(url)
 	if err != nil {
 		return nil, err
 	}
+	logrus.Debug("Body: ", string(body))
 	err = json.Unmarshal(body, &leads)
 	leads.client = c
 	return leads, err
@@ -137,11 +140,13 @@ func (c *Client) Lead(leadReq *LeadRequest) (lead *LeadResponse, err error) {
 	if len(leadReq.Fields) > 0 {
 		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
 	}
-	logrus.Debug("Fields: ", fields.Encode())
-	body, err := c.Get("/lead/" + strconv.Itoa(leadReq.ID) + ".json" + "?" + fields.Encode())
+	url := fmt.Sprintf("/lead/%s.json?%s", strconv.Itoa(leadReq.ID), fields.Encode())
+	logrus.Debug("Get: ", url)
+	body, err := c.Get(url)
 	if err != nil {
 		return
 	}
+	logrus.Debug("Body: ", string(body))
 	err = json.Unmarshal(body, &lead)
 	lead.client = c
 	return lead, err
