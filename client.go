@@ -145,5 +145,7 @@ func (c *Client) Post(resource string, data []byte) ([]byte, error) {
 	}
 	logrus.Debug("Token: ", c.auth.Token)
 	req.Header.Add("Authorization", "Bearer "+c.auth.Token)
+	req.Header.Set("Content-Type", "application/json")
+
 	return c.do(req)
 }
