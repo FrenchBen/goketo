@@ -12,19 +12,22 @@ import (
 
 // Convert all to Interfaces for re-usability
 // Add fmt.Sprintf("%v:%v", host, port) to build strings
-
-// LeadResponse response from list request
-type LeadResponse struct {
-	client    *Client
-	RequestID string          `json:"requestId"`
-	Result    json.RawMessage `json:"result"`
-	Success   bool            `json:"success"`
-	Next      string          `json:"nextPageToken,omitempty"`
-	More      bool            `json:"moreResult,omitempty"`
+// apiResponse common api response structure
+type apiResponse struct {
+	RequestID string `json:"requestId"`
+	Success   bool   `json:"success"`
+	Next      string `json:"nextPageToken,omitempty"`
+	More      bool   `json:"moreResult,omitempty"`
 	Errors    []struct {
 		Code    string `json:"code"`
 		Message string `json:"message"`
 	} `json:"errors,omitempty"`
+}
+
+// LeadResponse response from list request
+type LeadResponse struct {
+	apiResponse
+	Result json.RawMessage `json:"result,omitempty"`
 }
 
 // LeadResult default result struct as part of the lead - can be customized to allow greater fields
@@ -73,10 +76,9 @@ type LeadError struct {
 
 // LeadFieldResponse response for all fields
 type LeadFieldResponse struct {
-	client    *Client
-	RequestID string      `json:"requestId"`
-	Result    []LeadField `json:"result"`
-	Success   bool        `json:"success"`
+	client *Client
+	apiResponse
+	Result []LeadField `json:"result"`
 }
 
 // LeadField describes all possible fields for Leads
@@ -113,69 +115,68 @@ type DeletedLead struct {
 }
 
 // Leads Get leads by list Id
-func (c *Client) Leads(leadReq *LeadRequest) (leads *LeadResponse, err error) {
-	nextPage := url.Values{}
+func Leads(req Requester, leadReq *LeadRequest) (leads *LeadResponse, err error) {
+	urlQuery := url.Values{}
 	if leadReq.Next != "" {
-		nextPage.Set("nextPageToken", leadReq.Next)
+		urlQuery.Set("nextPageToken", leadReq.Next)
 	}
-	fields := url.Values{}
 	if len(leadReq.Fields) > 0 {
-		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
+		urlQuery.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
 	}
-	url := fmt.Sprintf("/list/%s/leads.json?%s&%s", strconv.Itoa(leadReq.ID), nextPage.Encode(), fields.Encode())
+	url := fmt.Sprintf("list/%s/leads.json?%s", strconv.Itoa(leadReq.ID), urlQuery.Encode())
 	logrus.Debug("Get: ", url)
-	body, err := c.Get(url)
+	body, err := req.Get(url)
 	if err != nil {
 		return nil, err
 	}
 	logrus.Debug("Body: ", string(body))
 	err = json.Unmarshal(body, &leads)
-	leads.client = c
 	return leads, err
 }
 
 // Lead Get lead by Id - aka member by ID
-func (c *Client) Lead(leadReq *LeadRequest) (lead *LeadResponse, err error) {
-	fields := url.Values{}
+func Lead(req Requester, leadReq *LeadRequest) (lead *LeadResponse, err error) {
+	urlQuery := url.Values{}
 	if len(leadReq.Fields) > 0 {
-		fields.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
+		urlQuery.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
 	}
-	url := fmt.Sprintf("/lead/%s.json?%s", strconv.Itoa(leadReq.ID), fields.Encode())
+	url := fmt.Sprintf("lead/%s.json?%s", strconv.Itoa(leadReq.ID), urlQuery.Encode())
 	logrus.Debug("Get: ", url)
-	body, err := c.Get(url)
+	body, err := req.Get(url)
 	if err != nil {
 		return
 	}
 	logrus.Debug("Body: ", string(body))
 	err = json.Unmarshal(body, &lead)
-	lead.client = c
 	return lead, err
 }
 
 // UpdateLeads post update of data for a lead
-func (c *Client) UpdateLeads(update *LeadUpdate) ([]byte, error) {
+func UpdateLeads(req Requester, update *LeadUpdate) ([]byte, error) {
 	data, err := json.Marshal(update)
 	if err != nil {
 		return nil, err
 	}
-	body, err := c.Post("/leads.json", data)
+	body, err := req.Post("leads.json", data)
 	return body, err
 }
 
 // LeadFields return all fields and the data type of a lead object
-func (c *Client) LeadFields() (fields *LeadFieldResponse, err error) {
-	body, err := c.Get("/leads/describe.json")
+func LeadFields(req Requester) (fields *LeadFieldResponse, err error) {
+	body, err := req.Get("leads/describe.json")
 	err = json.Unmarshal(body, &fields)
 	return fields, err
 }
 
 // DeletedLeads returns a list of leads that were deleted
-func (c *Client) DeletedLeads(leadReq *LeadRequest) (deletedLeads *DeletedLeadResponse, err error) {
-	nextPage := url.Values{}
+func DeletedLeads(req Requester, leadReq *LeadRequest) (deletedLeads *DeletedLeadResponse, err error) {
+	urlQuery := url.Values{}
 	if leadReq.Next != "" {
-		nextPage.Set("&nextPageToken", leadReq.Next)
+		urlQuery.Set("&nextPageToken", leadReq.Next)
 	}
-	body, err := c.Get("/activities/deletedleads.json?" + nextPage.Encode())
+	url := fmt.Sprintf("activities/deletedleads.json?%s", urlQuery.Encode())
+	logrus.Debug("Get: ", url)
+	body, err := req.Get(url)
 	err = json.Unmarshal(body, &deletedLeads)
 	return deletedLeads, err
 }
