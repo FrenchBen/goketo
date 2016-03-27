@@ -55,7 +55,7 @@ func main() {
 	// Get leads
   listID, _ := strconv.Atoi(auth.LeadID)
 	leadRequest := &goketo.LeadRequest{ID: listID}
-	leads, err := marketo.Leads(leadRequest)
+	leads, err := goketo.Leads(marketo, leadRequest)
 	if err != nil {
 		logrus.Error("Couldn't get leads: ", err)
 	}  
@@ -67,7 +67,7 @@ func main() {
   // Get user by lead ID
   leadID, _ := results[0].ID
 	leadRequest := &goketo.LeadRequest{ID: leadID}
-	lead, err := marketo.Lead(leadRequest)
+	lead, err := goketo.Lead(marketo, leadRequest)
 	if err != nil {
 		logrus.Error("Couldn't get lead: ", err)
 	}
