@@ -121,7 +121,8 @@ func Leads(req Requester, leadReq *LeadRequest) (leads *LeadResponse, err error)
 		urlQuery.Set("nextPageToken", leadReq.Next)
 	}
 	if len(leadReq.Fields) > 0 {
-		urlQuery.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
+		// join fields that are separate by space ' ' instead of ','
+		urlQuery.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ","))
 	}
 	url := fmt.Sprintf("list/%s/leads.json?%s", strconv.Itoa(leadReq.ID), urlQuery.Encode())
 	logrus.Debug("Get: ", url)
@@ -138,7 +139,8 @@ func Leads(req Requester, leadReq *LeadRequest) (leads *LeadResponse, err error)
 func Lead(req Requester, leadReq *LeadRequest) (lead *LeadResponse, err error) {
 	urlQuery := url.Values{}
 	if len(leadReq.Fields) > 0 {
-		urlQuery.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ""))
+		// join fields that are separate by space ' ' instead of ','
+		urlQuery.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ","))
 	}
 	url := fmt.Sprintf("lead/%s.json?%s", strconv.Itoa(leadReq.ID), urlQuery.Encode())
 	logrus.Debug("Get: ", url)
@@ -149,6 +151,43 @@ func Lead(req Requester, leadReq *LeadRequest) (lead *LeadResponse, err error) {
 	logrus.Debug("Body: ", string(body))
 	err = json.Unmarshal(body, &lead)
 	return lead, err
+}
+
+// LeadsFilter Get leads by filter Type
+// Common filter types:
+//  - id
+//  - cookies
+//  - email
+//  - twitterId
+//  - facebookId
+//  - linkedInId
+//  - sfdcAccountId
+//  - sfdcContactId
+//  - sfdcLeadId
+//  - sfdcLeadOwnerId
+//  - sfdcOpptyId
+func LeadsFilter(req Requester, leadReq *LeadRequest, filterType string, filterValues []string) (leads *LeadResponse, err error) {
+	urlQuery := url.Values{}
+	urlQuery.Set("filterType", filterType)
+	if leadReq.Next != "" {
+		urlQuery.Set("nextPageToken", leadReq.Next)
+	}
+	if len(leadReq.Fields) > 0 {
+		// join fields that are separate by space ' ' instead of ','
+		urlQuery.Set("fields", strings.Join(strings.Fields(leadReq.Fields), ","))
+	}
+	if len(filterValues) > 0 {
+		urlQuery.Set("filterValues", strings.Join(filterValues, ","))
+	}
+	url := fmt.Sprintf("leads.json?%s", urlQuery.Encode())
+	logrus.Debug("Get: ", url)
+	body, err := req.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	logrus.Debug("Body: ", string(body))
+	err = json.Unmarshal(body, &leads)
+	return leads, err
 }
 
 // UpdateLeads post update of data for a lead
