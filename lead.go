@@ -59,19 +59,16 @@ type LeadUpdateResponse struct {
 	ID      string             `json:"requestId"`
 	Success bool               `json:"success"`
 	Result  []LeadUpdateResult `json:"result,omitempty"`
-	Error   []LeadError        `json:"errors,omitempty"`
+	Errors  []struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	} `json:"errors,omitempty"`
 }
 
 // LeadUpdateResult holds result for all updates
 type LeadUpdateResult struct {
 	ID     int    `json:"id"`
 	Status string `json:"status"`
-}
-
-// LeadError shows the error code and message for response
-type LeadError struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
 }
 
 // LeadFieldResponse response for all fields
