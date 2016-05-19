@@ -83,6 +83,7 @@ func main() {
 To view more the token and fields sent with the request, set your log level to debug:
 `logrus.SetLevel(logrus.DebugLevel)`
 
+For information on usage, please see the [GoDoc](https://godoc.org/github.com/FrenchBen/goketo).
 
 License
 ----------------
