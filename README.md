@@ -2,7 +2,7 @@ GoKeto: Marketo REST API Client
 ===============================
 [![GoDoc](https://godoc.org/github.com/FrenchBen/goketo?status.svg)](https://godoc.org/github.com/FrenchBen/goketo)
 [![CircleCI](https://circleci.com/gh/FrenchBen/goketo.svg?style=shield)](https://circleci.com/gh/FrenchBen/goketo)
-[![TravisCI](https://travis-ci.org/FrenchBen/goketo.svg?branch=codecov)](https://travis-ci.org/FrenchBen/goketo)
+[![TravisCI](https://travis-ci.org/FrenchBen/goketo.svg?branch=master)](https://travis-ci.org/FrenchBen/goketo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/FrenchBen/goketo)](https://goreportcard.com/report/github.com/FrenchBen/goketo)
 
 <p align="center">
