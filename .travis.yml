@@ -2,6 +2,8 @@ language: go
 
 go:
   - 1.6
+script:
+  - go test -coverprofile=coverage.txt -covermode=atomic
 
 # CODECOV_TOKEN set in travis ENV
 after_success:
