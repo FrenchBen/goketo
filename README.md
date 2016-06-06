@@ -5,7 +5,7 @@ GoKeto: Marketo REST API Client
 [![CircleCI](https://circleci.com/gh/FrenchBen/goketo.svg?style=shield)](https://circleci.com/gh/FrenchBen/goketo)
 [![TravisCI](https://travis-ci.org/FrenchBen/goketo.svg?branch=master)](https://travis-ci.org/FrenchBen/goketo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/FrenchBen/goketo)](https://goreportcard.com/report/github.com/FrenchBen/goketo)
-[![Badge Badge](http://badge-server.badge-validate.80d2e13b.svc.dockerapp.io:8088/github.com/FrenchBen/goketo)](https://github.com/FrenchBen/goketo)
+[![Badge Badge](http://doyouevenbadge/github.com/FrenchBen/goketo)](https://github.com/FrenchBen/goketo)
 
 <p align="center">
   <a href="http://golang.org" target="_blank"><img alt="Go package" src="https://golang.org/doc/gopher/pencil/gopherhat.jpg" width="20%" /></a>
