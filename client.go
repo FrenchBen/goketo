@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/Sirupsen/logrus"
 )
@@ -25,6 +26,7 @@ type Client struct {
 	endpoint string
 	identity string
 	version  string
+	authLock sync.Mutex
 	auth     *AuthToken
 }
 
@@ -76,36 +78,45 @@ func NewAuthClient(clientID string, ClientSecret string, ClientEndpoint string) 
 		identity = "https://" + ClientEndpoint + "/identity/"
 	}
 	// Add credentials to the request
-	client := &http.Client{
-		Transport: &bearerRoundTripper{
-			clientID:     clientID,
-			clientSecret: ClientSecret,
+	client := &Client{
+		client: &http.Client{
+			Transport: &bearerRoundTripper{
+				clientID:     clientID,
+				clientSecret: ClientSecret,
+			},
 		},
-	}
-	// Make request for token
-	resp, err := client.Get(identity + "oauth/token?grant_type=client_credentials")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	var auth AuthToken
-	if resp.StatusCode == 200 {
-		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			logrus.Errorf("Could not convert response: %v", err)
-		}
-		err = json.Unmarshal(data, &auth)
-	} else {
-		logrus.Errorf("An error occured while fetching data: %v", resp)
-	}
-
-	return &Client{
-		client:   client,
 		endpoint: endpoint,
 		identity: identity,
 		version:  version,
-		auth:     &auth,
-	}, nil
+	}
+
+	if err := client.RefreshToken(); err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// RefreshToken refreshes the auth token provided by the Marketo API.
+func (c *Client) RefreshToken() error {
+	// Make request for token
+	resp, err := c.client.Get(c.identity + "oauth/token?grant_type=client_credentials")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("an error occured while fetching data: %v", resp)
+	}
+
+	var auth AuthToken
+	if err := json.NewDecoder(resp.Body).Decode(&auth); err != nil {
+		logrus.Errorf("Could not convert response: %v", err)
+		return err
+	}
+	c.authLock.Lock()
+	defer c.authLock.Unlock()
+	c.auth = &auth
+	return nil
 }
 
 func (c *Client) do(req *http.Request) ([]byte, error) {
@@ -132,8 +143,10 @@ func (c *Client) Get(resource string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	c.authLock.Lock()
 	logrus.Debug("Token: ", c.auth.Token)
 	req.Header.Add("Authorization", "Bearer "+c.auth.Token)
+	c.authLock.Unlock()
 	return c.do(req)
 }
 
@@ -143,8 +156,10 @@ func (c *Client) Post(resource string, data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	c.authLock.Lock()
 	logrus.Debug("Token: ", c.auth.Token)
 	req.Header.Add("Authorization", "Bearer "+c.auth.Token)
+	c.authLock.Unlock()
 	req.Header.Set("Content-Type", "application/json")
 
 	return c.do(req)
