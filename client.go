@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Requester is the interface for all client calls - This allows easy test 'mocks'
